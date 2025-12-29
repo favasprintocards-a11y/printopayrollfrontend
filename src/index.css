@@ -1,0 +1,674 @@
+/* ================================
+   GLOBAL FONT & RESET
+================================ */
+@import url('https://fonts.googleapis.com/css2?family=Exo:wght@300;400;500;600;700;800;900&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  background: #fff;
+  font-family: "Exo", sans-serif;
+  color: #111;
+  font-weight: 600;
+}
+
+/* ================================
+   COLOR VARIABLES
+================================ */
+:root {
+  --primary: #ffffff;
+  --primary-dark: #f6f6f6;
+
+  --secondary: #ee6338;
+  --secondary-dark: #d44921;
+  --secondary-light: #ff9a78;
+
+  --success: #2ecc71;
+  --success-dark: #27ae60;
+
+  --danger: #e74c3c;
+  --danger-dark: #c0392b;
+
+  --text-dark: #111;
+  --text-medium: #444;
+  --text-light: #777;
+
+  --border: #e3e3e3;
+  --bg-light: #f8f8f8;
+
+  --shadow: rgba(0,0,0,0.1);
+}
+
+/* ================================
+   LAYOUT
+================================ */
+.app-shell { 
+  display: flex; 
+  min-height: 100vh; 
+  background: var(--primary); 
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 240px;
+  background: var(--primary);
+  border-right: 1px solid var(--border);
+  padding: 20px;
+}
+
+.brand {
+  color: var(--secondary);
+  font-weight: 800;
+  font-size: 22px;
+  text-decoration: none;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-btn {
+  padding: 6px 14px !important;
+  min-width: 70px;
+  text-align: center;
+}
+
+/* Page Header Styling */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+/* Special alignment fix for Add Button */
+.add-btn {
+  padding: 10px 20px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
+  min-width: 150px;     /* makes it visually balanced */
+  text-align: center;
+}
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.add-btn {
+  padding: 10px 20px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
+  min-width: 180px; /* You can increase width if needed */
+  text-align: center;
+}
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.btn-danger {
+  background: #e74c3c;
+  color: white;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.btn-danger:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+}
+
+.btn-secondary.btn-sm {
+  border: 2px solid var(--secondary);
+  color: var(--secondary);
+  background: white;
+}
+
+.btn-secondary.btn-sm:hover {
+  background: var(--secondary);
+  color: white;
+}
+
+.nav {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+a {
+  text-decoration: none !important;
+}
+
+.nav-item {
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--text-dark);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.nav-item:hover {
+  background: var(--bg-light);
+}
+
+.nav-item.active {
+  color: var(--secondary);
+  background: rgba(238,99,56,0.12);
+  font-weight: 700;
+}
+
+/* TOPBAR */
+.topbar {
+  height: 64px;
+  background: var(--primary);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.topbar .right {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  color: var(--text-light);
+}
+
+/* MAIN CONTENT */
+.main {
+  flex: 1;
+  padding: 24px;
+}
+
+/* ================================
+   CARD
+================================ */
+.card {
+  background: var(--primary);
+  border-radius: 12px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 12px var(--shadow);
+  transition: 0.25s ease;
+}
+
+.card:hover {
+  box-shadow: 0 8px 22px rgba(0,0,0,0.15);
+}
+
+/* ================================
+   BUTTON SYSTEM
+================================ */
+.btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  font-weight: 700;
+  transition: 0.25s ease;
+}
+
+/* PRIMARY */
+.btn-primary {
+  background: var(--secondary);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: var(--secondary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(238,99,56,0.3);
+}
+
+/* SECONDARY OUTLINE */
+.btn-secondary {
+  background: #ffffff;
+  border: 2px solid var(--secondary);
+  color: var(--secondary);
+}
+.btn-secondary:hover {
+  background: var(--secondary);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(238,99,56,0.25);
+}
+
+/* DANGER */
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+.btn-danger:hover {
+  background: var(--danger-dark);
+  transform: translateY(-2px);
+}
+
+/* SUCCESS */
+.btn-success {
+  background: var(--success);
+  color: #fff;
+}
+.btn-success:hover {
+  background: var(--success-dark);
+  transform: translateY(-2px);
+}
+
+/* GREY BUTTON */
+.btn-grey {
+  background: #e5e5e5;
+  color: #333;
+}
+.btn-grey:hover {
+  background: #d4d4d4;
+  transform: translateY(-2px);
+}
+
+/* ================================
+   FORM ELEMENTS
+================================ */
+.form-grid { 
+  display: grid; 
+  grid-template-columns: repeat(2,1fr);
+  gap: 14px;
+}
+
+.form-row { display: flex; flex-direction: column; gap: 6px; }
+
+.label {
+  color: var(--text-medium);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.input, .select {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #fff;
+}
+
+.input:focus, .select:focus {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(238,99,56,0.22);
+  outline: none;
+}
+
+/* ================================
+   TABLES
+================================ */
+.table-wrap { overflow-x: auto; }
+
+.table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.table thead th {
+  background: var(--primary-dark);
+  font-weight: 700;
+  color: var(--text-medium);
+}
+
+.table tr:hover td {
+  background: #fff3ec;
+}
+
+/* ================================
+   BADGES
+================================ */
+.tag {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.badge-office { background:#e9fdf2; color:#0c8c42; }
+.badge-unit { background:#f3e8ff; color:#7c3aed; }
+.badge-gst { background:rgba(238,99,56,0.15); color:var(--secondary); }
+
+/* ================================
+   RESPONSIVE
+================================ */
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .form-grid { grid-template-columns: 1fr; }
+  .table { min-width: 650px; }
+}
+/* ================================
+   DASHBOARD CARDS
+================================ */
+
+.dashboard-card {
+  text-decoration: none;
+  transition: 0.25s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 26px rgba(238, 99, 56, 0.22);
+}
+
+.dash-title {
+  font-size: 15px;
+  color: var(--text-medium);
+  margin-top: 10px;
+}
+
+.dash-value {
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-top: 8px;
+}
+
+/* ICON STYLE */
+.dash-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 26px;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+/* COLORFUL ICONS */
+.dash-icon.total {
+  background: rgba(0, 149, 255, 0.12);
+  color: #0073e6;
+}
+
+.dash-icon.office {
+  background: rgba(46, 204, 113, 0.15);
+  color: #1ca559;
+}
+
+.dash-icon.unit {
+  background: rgba(155, 89, 182, 0.15);
+  color: #8e44ad;
+}
+
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btn-table {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s ease;
+  text-decoration: none;
+}
+
+/* View */
+.btn-view {
+  background: #3498db;
+  color: white;
+}
+.btn-view:hover {
+  background: #217dbb;
+}
+
+/* Edit */
+.btn-edit {
+  background: #f1c40f;
+  color: #000;
+}
+.btn-edit:hover {
+  background: #d4ac0d;
+}
+
+/* Delete */
+.btn-delete {
+  background: #e74c3c;
+  color: white;
+}
+.btn-delete:hover {
+  background: #c0392b;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btn-table {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s ease;
+  text-decoration: none;
+}
+
+/* View */
+.btn-view {
+  background: #3498db;
+  color: white;
+}
+.btn-view:hover {
+  background: #217dbb;
+}
+
+/* Edit */
+.btn-edit {
+  background: #f1c40f;
+  color: #000;
+}
+.btn-edit:hover {
+  background: #d4ac0d;
+}
+
+/* Delete */
+.btn-delete {
+  background: #e74c3c;
+  color: white;
+}
+.btn-delete:hover {
+  background: #c0392b;
+}
+.small-input {
+  width: 90px;
+  padding: 6px 8px;
+}
+/* LOGIN PAGE */
+.login-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: var(--bg-light);
+}
+
+.login-container {
+  width: 360px;
+  background: #fff;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  text-align: center;
+}
+
+.login-title {
+  font-family: "Exo", sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--secondary);
+  margin-bottom: 4px;
+}
+
+.login-sub {
+  font-size: 14px;
+  color: var(--text-light);
+  margin-bottom: 20px;
+}
+
+.login-form {
+  text-align: left;
+}
+
+.login-btn {
+  width: 100%;
+  margin-top: 20px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 10px;
+}
+/* ------- LOGIN FORM ALIGNMENT FIX ------- */
+.login-container {
+  width: 360px;
+  max-width: 95%;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* make form layout vertical and consistent */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: stretch; /* ensure inputs take full width */
+  width: 100%;
+}
+
+/* label and input styling */
+.login-form .label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: var(--text-medium);
+  font-weight: 700;
+}
+
+/* inputs full width and consistent padding */
+.login-form .input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  font-size: 14px;
+  outline: none;
+}
+
+/* focus state */
+.login-form .input:focus {
+  border-color: var(--secondary);
+  box-shadow: 0 4px 12px rgba(238,99,56,0.12);
+}
+
+/* button alignment */
+.login-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+/* small screens: keep margins comfortable */
+@media (max-width: 420px) {
+  .login-container { padding: 20px; }
+  .login-btn { padding: 10px; }
+}
+/* Apply EXO font globally */
+* {
+  font-family: "Exo", sans-serif !important;
+}
+body {
+  font-optical-sizing: auto;
+  font-weight: 500;
+  background: #ffffff;
+  color: #111;
+}
+/* ------------- UNIVERSAL FORM ALIGNMENT FIX ------------- */
+
+.form-page {
+  max-width: 520px;
+  margin: auto;
+  padding: 25px;
+}
+
+.form-page label {
+  display: block;
+  margin-top: 15px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.form-page .input {
+  width: 100%;
+  padding: 10px 12px;
+  height: 42px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+  display: block;
+}
+
+.form-page button {
+  width: 100%;
+  height: 45px;
+  margin-top: 25px;
+}
+
+/* Remove grid / spacing issues */
+.card form {
+  display: block !important;
+}
