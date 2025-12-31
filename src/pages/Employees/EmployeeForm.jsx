@@ -8,6 +8,7 @@ export default function EmployeeForm() {
   const isEdit = Boolean(id);
 
   const [employee, setEmployee] = useState({
+    employeeId: "", // ✅ NEW
     name: "",
     department: "",
     location: "Office",
@@ -16,7 +17,6 @@ export default function EmployeeForm() {
     basicSalary: "",
     dailyWage: "",
 
-    // ⭐ NEW
     salaryIncrement: "",
     salaryIncrementFrom: "",
 
@@ -52,8 +52,6 @@ export default function EmployeeForm() {
     try {
       const payload = {
         ...employee,
-
-        // Clean unused salary field
         basicSalary:
           employee.salaryType === "monthly" ? employee.basicSalary : 0,
         dailyWage:
@@ -82,6 +80,20 @@ export default function EmployeeForm() {
       </h1>
 
       <form onSubmit={submit}>
+
+        {/* ✅ EMPLOYEE ID (READ ONLY) */}
+        {isEdit && (
+          <>
+            <label>Employee ID</label>
+            <input
+              className="input"
+              value={employee.employeeId}
+              disabled
+              style={{ background: "#f3f3f3", fontWeight: 600 }}
+            />
+          </>
+        )}
+
         {/* NAME */}
         <label>Name</label>
         <input
@@ -121,7 +133,7 @@ export default function EmployeeForm() {
           <option value="daily">Daily</option>
         </select>
 
-        {/* BASIC SALARY (MONTHLY) */}
+        {/* BASIC SALARY */}
         {employee.salaryType === "monthly" && (
           <>
             <label>Basic Salary</label>
@@ -148,34 +160,27 @@ export default function EmployeeForm() {
         )}
 
         {/* SALARY INCREMENT */}
-       {/* SALARY INCREMENT */}
-<label>Salary Increment Amount</label>
-<input
-  type="number"
-  className="input"
-  value={employee.salaryIncrement}
-  onChange={(e) => update("salaryIncrement", e.target.value)}
-  
-/>
+        <label>Salary Increment Amount</label>
+        <input
+          type="number"
+          className="input"
+          value={employee.salaryIncrement}
+          onChange={(e) => update("salaryIncrement", e.target.value)}
+        />
 
-<label>
-  Salary Increment Start From
-  
-</label>
+        <label>Salary Increment Start From</label>
+        <input
+          type="month"
+          className="input"
+          value={employee.salaryIncrementFrom}
+          onChange={(e) => update("salaryIncrementFrom", e.target.value)}
+          min="2020-01"
+          max="2035-12"
+        />
 
-<input
-  type="month"
-  className="input"
-  value={employee.salaryIncrementFrom}
-  onChange={(e) => update("salaryIncrementFrom", e.target.value)}
-  min="2020-01"
-  max="2035-12"
-/>
-
-<p style={{ fontSize: 12, color: "#888", marginTop: 4 }}>
-  💡 Tip: Use keyboard arrows ↑ ↓ or type year-month manually
-</p>
-
+        <p style={{ fontSize: 12, color: "#888", marginTop: 4 }}>
+          💡 Tip: Use arrow keys ↑ ↓ or type year-month manually
+        </p>
 
         {/* OT RATE */}
         <label>OT Rate (per hour)</label>
