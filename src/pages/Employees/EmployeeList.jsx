@@ -15,19 +15,6 @@ const formatMonth = (value) => {
 export default function EmployeeList() {
   const [employees, setEmployees] = useState([]);
 
-  // ✅ Increment history modal state
-  const [showHistory, setShowHistory] = useState(false);
-  const [historyData, setHistoryData] = useState([]);
-  const [selectedEmployee, setSelectedEmployee] = useState("");
-
-  // Filters
-  const [locationFilter, setLocationFilter] = useState("all");
-  const [salaryFilter, setSalaryFilter] = useState("all");
-  const [gstFilter, setGstFilter] = useState("all");
-  const [departmentFilter, setDepartmentFilter] = useState("all");
-  const [paymentFilter, setPaymentFilter] = useState("all");
-  const [search, setSearch] = useState("");
-
   useEffect(() => {
     fetchEmployees();
   }, []);
@@ -35,18 +22,6 @@ export default function EmployeeList() {
   const fetchEmployees = async () => {
     const res = await api.get("/employees");
     setEmployees(res.data);
-  };
-
-  // ✅ FETCH INCREMENT HISTORY
-  const openIncrementHistory = async (emp) => {
-    try {
-      const res = await api.get(`/employees/${emp._id}/increment-history`);
-      setHistoryData(res.data || []);
-      setSelectedEmployee(emp.name);
-      setShowHistory(true);
-    } catch (err) {
-      alert("No increment history found");
-    }
   };
 
   const deleteEmployee = async (id) => {
@@ -70,6 +45,7 @@ export default function EmployeeList() {
         <table className="table">
           <thead>
             <tr>
+              <th>Employee ID</th> {/* ✅ NEW */}
               <th>Name</th>
               <th>Department</th>
               <th>Location</th>
@@ -88,23 +64,35 @@ export default function EmployeeList() {
           <tbody>
             {employees.map((emp) => (
               <tr key={emp._id}>
+                {/* ✅ EMPLOYEE ID */}
+                <td style={{ fontWeight: 600 }}>
+                  {emp.employeeId || "—"}
+                </td>
+
                 <td>
-                  <Link to={`/employees/view/${emp._id}`} style={{ fontWeight: 600 }}>
+                  <Link
+                    to={`/employees/view/${emp._id}`}
+                    style={{ fontWeight: 600 }}
+                  >
                     {emp.name}
                   </Link>
                 </td>
 
                 <td>{emp.department || "—"}</td>
-
                 <td>{emp.location}</td>
-
                 <td>{emp.salaryType?.toUpperCase()}</td>
 
-                <td>₹ {emp.salaryType === "monthly" ? emp.basicSalary : "—"}</td>
+                <td>
+                  ₹ {emp.salaryType === "monthly" ? emp.basicSalary : "—"}
+                </td>
 
-                <td>{emp.salaryType === "daily" ? `₹ ${emp.dailyWage}` : "—"}</td>
+                <td>
+                  {emp.salaryType === "daily" ? `₹ ${emp.dailyWage}` : "—"}
+                </td>
 
-                <td>{emp.salaryIncrement ? `₹ ${emp.salaryIncrement}` : "—"}</td>
+                <td>
+                  {emp.salaryIncrement ? `₹ ${emp.salaryIncrement}` : "—"}
+                </td>
 
                 <td>{formatMonth(emp.salaryIncrementFrom)}</td>
 
@@ -115,18 +103,19 @@ export default function EmployeeList() {
                 <td>{emp.paymentMethod}</td>
 
                 <td style={{ display: "flex", gap: 6 }}>
-                  <Link to={`/employees/edit/${emp._id}`} className="btn btn-secondary action-btn">
+                  <Link
+                    to={`/employees/edit/${emp._id}`}
+                    className="btn btn-secondary action-btn"
+                  >
                     Edit
                   </Link>
 
-                  {/* ✅ NEW HISTORY BUTTON */}
                   <Link
-                      to={`/employees/${emp._id}/increment-history`}
-                     className="btn btn-secondary action-btn"
-                                         >
-                         Increment History
-                     </Link>
-
+                    to={`/employees/${emp._id}/increment-history`}
+                    className="btn btn-secondary action-btn"
+                  >
+                    Increment History
+                  </Link>
 
                   <button
                     className="btn btn-danger action-btn"
@@ -137,50 +126,17 @@ export default function EmployeeList() {
                 </td>
               </tr>
             ))}
+
+            {employees.length === 0 && (
+              <tr>
+                <td colSpan="13" style={{ padding: 20, opacity: 0.6 }}>
+                  No employees found.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
-
-      {/* ================= INCREMENT HISTORY MODAL ================= */}
-      {showHistory && (
-        <div className="modal-backdrop">
-          <div className="modal card" style={{ maxWidth: 600 }}>
-            <h2>Salary Increment History – {selectedEmployee}</h2>
-
-            {historyData.length === 0 ? (
-              <p style={{ opacity: 0.6 }}>No increment history available.</p>
-            ) : (
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Increment Amount</th>
-                    <th>Increment From</th>
-                    <th>Applied On</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {historyData.map((h, i) => (
-                    <tr key={i}>
-                      <td>₹ {h.amount}</td>
-                      <td>{formatMonth(h.fromMonth)}</td>
-                      <td>{new Date(h.appliedOn).toLocaleDateString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-
-            <button
-              className="btn btn-secondary"
-              style={{ marginTop: 10 }}
-              onClick={() => setShowHistory(false)}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-      {/* ============================================================ */}
     </div>
   );
 }

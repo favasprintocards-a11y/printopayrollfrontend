@@ -8,7 +8,7 @@ export default function EmployeeForm() {
   const isEdit = Boolean(id);
 
   const [employee, setEmployee] = useState({
-    employeeId: "", // ✅ NEW
+    employeeId: "",   // ✅ editable
     name: "",
     department: "",
     location: "Office",
@@ -32,6 +32,7 @@ export default function EmployeeForm() {
         const r = await api.get(`/employees/${id}`);
         setEmployee({
           ...r.data,
+          employeeId: r.data.employeeId || "",
           salaryIncrement: r.data.salaryIncrement || "",
           salaryIncrementFrom: r.data.salaryIncrementFrom || "",
         });
@@ -81,18 +82,19 @@ export default function EmployeeForm() {
 
       <form onSubmit={submit}>
 
-        {/* ✅ EMPLOYEE ID (READ ONLY) */}
-        {isEdit && (
-          <>
-            <label>Employee ID</label>
-            <input
-              className="input"
-              value={employee.employeeId}
-              disabled
-              style={{ background: "#f3f3f3", fontWeight: 600 }}
-            />
-          </>
-        )}
+        {/* ✅ EMPLOYEE ID (NOW EDITABLE ALWAYS) */}
+        <label>Employee ID</label>
+        <input
+          className="input"
+          value={employee.employeeId}
+          onChange={(e) =>
+            update("employeeId", e.target.value.toUpperCase())
+          }
+         
+          
+        />
+
+        
 
         {/* NAME */}
         <label>Name</label>
@@ -179,7 +181,7 @@ export default function EmployeeForm() {
         />
 
         <p style={{ fontSize: 12, color: "#888", marginTop: 4 }}>
-          💡 Tip: Use arrow keys ↑ ↓ or type year-month manually
+          💡 Tip: Use keyboard arrows ↑ ↓ or type year-month manually
         </p>
 
         {/* OT RATE */}
