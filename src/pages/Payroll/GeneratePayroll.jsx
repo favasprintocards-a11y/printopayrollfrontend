@@ -11,20 +11,20 @@ export default function GeneratePayroll() {
   // ===============================
   const isIncrementApplicable = (payrollMonth, fromMonth) => {
     if (!payrollMonth || !fromMonth) return false;
-    return payrollMonth >= fromMonth; // YYYY-MM comparison
+    return payrollMonth >= fromMonth;
   };
 
-  // ===============================
-  // FORMAT MONTH
-  // ===============================
   const formatMonthYear = (value) => {
     if (!value) return "";
     const d = new Date(value + "-01");
-    return d.toLocaleString("default", { month: "long", year: "numeric" });
+    return d.toLocaleString("default", {
+      month: "long",
+      year: "numeric",
+    });
   };
 
   // ===============================
-  // GET BASE RATE (WITH INCREMENT)
+  // GET BASE RATE
   // ===============================
   const getBaseRate = (emp) => {
     const applied = isIncrementApplicable(month, emp.salaryIncrementFrom);
@@ -35,37 +35,15 @@ export default function GeneratePayroll() {
       : Number(emp.basicSalary || 0) + increment;
   };
 
-  // ===============================
-  // INCREMENT LABEL
-  // ===============================
   const getIncrementDisplay = (emp) => {
     if (!emp.salaryIncrement || !emp.salaryIncrementFrom) return "—";
 
-    const formattedMonth = formatMonthYear(emp.salaryIncrementFrom);
     const applied = isIncrementApplicable(month, emp.salaryIncrementFrom);
+    const fm = formatMonthYear(emp.salaryIncrementFrom);
 
-    if (applied) {
-      return (
-        <span
-          style={{
-            background: "#fdecea",
-            color: "#c62828",
-            padding: "4px 8px",
-            borderRadius: 6,
-            fontSize: 12,
-            fontWeight: 700,
-          }}
-        >
-          Salary increased ₹{emp.salaryIncrement} from {formattedMonth} onwards
-        </span>
-      );
-    }
-
-    return (
-      <span style={{ color: "#e65100", fontWeight: 600, fontSize: 12 }}>
-        ₹{emp.salaryIncrement} salary increment from {formattedMonth} onwards
-      </span>
-    );
+    return applied
+      ? `₹${emp.salaryIncrement} applied from ${fm}`
+      : `₹${emp.salaryIncrement} from ${fm}`;
   };
 
   // ===============================
@@ -74,168 +52,105 @@ export default function GeneratePayroll() {
   useEffect(() => {
     (async () => {
       const r = await api.get("/employees");
-
-      const list = r.data.map((e) => ({
-        _id: e._id,
-        name: e.name,
-        location: e.location,
-        salaryType: e.salaryType,
-
-        basicSalary: e.basicSalary || 0,
-        dailyWage: e.dailyWage || 0,
-
-        salaryIncrement: e.salaryIncrement || 0,
-        salaryIncrementFrom: e.salaryIncrementFrom || null,
-
-        otRate: e.otRate || 0,
-
-        leaveDeducted: "",
-        casualLeave: "",
-        taDa: "",
-        overtime: "",
-        otAmount: "",
-        festivalAllowance: "",
-        otherAllowance: "",
-        advanceSalary: "",
-        note: "", // ✅ NOTE FIELD
-
-        balanceSalary: 0,
-      }));
-
-      setEmployees(list);
+      setEmployees(
+        r.data.map((e) => ({
+          ...e,
+          leaveDeducted: "",
+          casualLeave: "",
+          taDa: "",
+          overtime: "",
+          otAmount: "",
+          festivalAllowance: "",
+          otherAllowance: "",
+          advanceSalary: "",
+          note: "",
+          balanceSalary: 0,
+          workingDays: "",
+        }))
+      );
     })();
   }, []);
 
   // ===============================
-  // LEAVE DEDUCTION
+  // LEAVE CALC
   // ===============================
   const calculateLeaveDeduction = (
     salaryType,
     baseRate,
     leave,
-    casualLeave
+    casual
   ) => {
-    const l = Number(leave || 0);
-    const c = Number(casualLeave || 0);
-    const effectiveLeave = Math.max(l - c, 0);
-
-    if (effectiveLeave === 0) return 0;
+    const eff = Math.max(Number(leave || 0) - Number(casual || 0), 0);
+    if (!eff) return 0;
 
     return salaryType === "daily"
-      ? baseRate * effectiveLeave
-      : (baseRate / 30) * effectiveLeave;
+      ? baseRate * eff
+      : (baseRate / 30) * eff;
   };
 
   // ===============================
-  // RECALCULATE ONE ROW
+  // RECALC
   // ===============================
-  const recalc = (index, field, value) => {
+  const recalc = (i, field, value) => {
     const arr = [...employees];
-    const emp = arr[index];
-    emp[field] = value;
+    const e = arr[i];
+    e[field] = value;
 
     if (field === "overtime") {
-      emp.otAmount = Number(value || 0) * Number(emp.otRate || 0);
+      e.otAmount = Number(value || 0) * Number(e.otRate || 0);
     }
 
-    const baseRate = getBaseRate(emp);
+    const baseRate = getBaseRate(e);
+    const days =
+      e.salaryType === "daily"
+        ? Number(e.workingDays || 0)
+        : Number(workingDays || 0);
 
     const baseSalary =
-      emp.salaryType === "daily"
-        ? baseRate * Number(workingDays || 0)
-        : baseRate;
+      e.salaryType === "daily" ? baseRate * days : baseRate;
 
-    const leaveDeduction = calculateLeaveDeduction(
-      emp.salaryType,
+    const deduction = calculateLeaveDeduction(
+      e.salaryType,
       baseRate,
-      emp.leaveDeducted,
-      emp.casualLeave
+      e.leaveDeducted,
+      e.casualLeave
     );
 
-    emp.balanceSalary =
+    e.balanceSalary =
       baseSalary -
-      leaveDeduction +
-      Number(emp.taDa || 0) +
-      Number(emp.otAmount || 0) +
-      Number(emp.festivalAllowance || 0) +
-      Number(emp.otherAllowance || 0) -
-      Number(emp.advanceSalary || 0);
+      deduction +
+      Number(e.taDa || 0) +
+      Number(e.otAmount || 0) +
+      Number(e.festivalAllowance || 0) +
+      Number(e.otherAllowance || 0) -
+      Number(e.advanceSalary || 0);
 
     setEmployees(arr);
   };
 
   // ===============================
-  // RECALCULATE ALL
-  // ===============================
-  const recalcAll = (days = workingDays) => {
-    const arr = [...employees];
-
-    arr.forEach((emp) => {
-      const baseRate = getBaseRate(emp);
-
-      const baseSalary =
-        emp.salaryType === "daily"
-          ? baseRate * Number(days || 0)
-          : baseRate;
-
-      const leaveDeduction = calculateLeaveDeduction(
-        emp.salaryType,
-        baseRate,
-        emp.leaveDeducted,
-        emp.casualLeave
-      );
-
-      emp.balanceSalary =
-        baseSalary -
-        leaveDeduction +
-        Number(emp.taDa || 0) +
-        Number(emp.otAmount || 0) +
-        Number(emp.festivalAllowance || 0) +
-        Number(emp.otherAllowance || 0) -
-        Number(emp.advanceSalary || 0);
-    });
-
-    setEmployees(arr);
-  };
-
-  useEffect(() => {
-    if (month) recalcAll();
-  }, [month]);
-
-  // ===============================
-  // SAVE PAYROLL
+  // SAVE
   // ===============================
   const save = async () => {
-    if (!month) return alert("Please select month");
+    if (!month) return alert("Select month");
 
-    try {
-      await api.post("/payroll", {
-        month,
-        workingDays,
-        employees: employees.map((e) => ({
-          ...e,
-          incrementApplied:
-            isIncrementApplicable(month, e.salaryIncrementFrom) &&
-            e.salaryIncrement > 0,
-        })),
-      });
+    await api.post("/payroll", {
+      month,
+      workingDays,
+      employees,
+    });
 
-      alert("Payroll Generated Successfully!");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to generate payroll");
-    }
+    alert("Payroll Generated");
   };
 
-  // ===============================
-  // UI
-  // ===============================
   return (
     <div>
+      {/* HEADER */}
       <div className="page-header">
         <h1 className="page-title">Generate Payroll</h1>
       </div>
 
+      {/* MONTH */}
       <div className="card">
         <label>Month</label>
         <input
@@ -246,104 +161,116 @@ export default function GeneratePayroll() {
         />
       </div>
 
-      <div className="card" style={{ marginTop: 20 }}>
-        <label style={{ fontWeight: 600 }}>Working Days (Common)</label>
+      {/* COMMON DAYS */}
+      <div className="card" style={{ marginTop: 15 }}>
+        <label>Common Working Days (Monthly)</label>
         <input
-          type="number"
           className="input"
+          type="number"
           value={workingDays}
-          onChange={(e) => {
-            setWorkingDays(e.target.value);
-            recalcAll(e.target.value);
-          }}
+          onChange={(e) => setWorkingDays(e.target.value)}
         />
       </div>
 
-      <div className="card" style={{ marginTop: 20 }}>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Base Salary</th>
-              <th>Increment</th>
-              <th>OT Rate</th>
-              <th>Leave</th>
-              <th>Casual</th>
-              <th>TA+DA</th>
-              <th>OT Hrs</th>
-              <th>OT Amount</th>
-              <th>Festival</th>
-              <th>Other</th>
-              <th>Advance</th>
-              <th>Note</th> {/* ✅ NEW */}
-              <th>Final</th>
-            </tr>
-          </thead>
+      {/* EMPLOYEES */}
+      {employees.map((e, i) => (
+        <div key={i} className="card" style={{ marginTop: 25 }}>
+          <h2>
+            {e.name} <small>({e.location})</small>
+          </h2>
 
-          <tbody>
-            {employees.map((e, i) => (
-              <tr key={i}>
-                <td>{e.name} ({e.location})</td>
+          <table className="table">
+            <tbody>
+              <tr>
+                <td>Base Salary</td>
+                <td>
+                  ₹ {getBaseRate(e)} {e.salaryType === "daily" && "/ day"}
+                </td>
+              </tr>
 
-                <td>₹ {getBaseRate(e)}{e.salaryType === "daily" && " / day"}</td>
-
+              <tr>
+                <td>Salary Increment</td>
                 <td>{getIncrementDisplay(e)}</td>
+              </tr>
 
+              <tr>
+                <td>OT Rate</td>
                 <td>₹ {e.otRate}</td>
+              </tr>
 
+              <tr>
+                <td>Working Days</td>
                 <td>
-                  <input className="input" value={e.leaveDeducted}
-                    onChange={(ev) => recalc(i, "leaveDeducted", ev.target.value)} />
+                  {e.salaryType === "daily" ? (
+                    <input
+                      className="input"
+                      value={e.workingDays}
+                      onChange={(ev) =>
+                        recalc(i, "workingDays", ev.target.value)
+                      }
+                    />
+                  ) : (
+                    <strong>{workingDays || "-"}</strong>
+                  )}
                 </td>
+              </tr>
 
-                <td>
-                  <input className="input" value={e.casualLeave}
-                    onChange={(ev) => recalc(i, "casualLeave", ev.target.value)} />
-                </td>
+              {[
+                ["Leave", "leaveDeducted"],
+                ["Casual Leave", "casualLeave"],
+                ["TA + DA", "taDa"],
+                ["OT Hours", "overtime"],
+                ["Festival Allowance", "festivalAllowance"],
+                ["Other Allowance", "otherAllowance"],
+                ["Advance Salary", "advanceSalary"],
+              ].map(([label, key]) => (
+                <tr key={key}>
+                  <td>{label}</td>
+                  <td>
+                    <input
+                      className="input"
+                      value={e[key]}
+                      onChange={(ev) =>
+                        recalc(i, key, ev.target.value)
+                      }
+                    />
+                  </td>
+                </tr>
+              ))}
 
-                <td>
-                  <input className="input" value={e.taDa}
-                    onChange={(ev) => recalc(i, "taDa", ev.target.value)} />
-                </td>
-
-                <td>
-                  <input className="input" value={e.overtime}
-                    onChange={(ev) => recalc(i, "overtime", ev.target.value)} />
-                </td>
-
+              <tr>
+                <td>OT Amount</td>
                 <td>₹ {e.otAmount}</td>
+              </tr>
 
-                <td>
-                  <input className="input" value={e.festivalAllowance}
-                    onChange={(ev) => recalc(i, "festivalAllowance", ev.target.value)} />
-                </td>
-
-                <td>
-                  <input className="input" value={e.otherAllowance}
-                    onChange={(ev) => recalc(i, "otherAllowance", ev.target.value)} />
-                </td>
-
-                <td>
-                  <input className="input" value={e.advanceSalary}
-                    onChange={(ev) => recalc(i, "advanceSalary", ev.target.value)} />
-                </td>
-
-                {/* ✅ NOTE INPUT */}
+              <tr>
+                <td>Note</td>
                 <td>
                   <input
                     className="input"
                     value={e.note}
-                    placeholder="Note..."
-                    onChange={(ev) => recalc(i, "note", ev.target.value)}
+                    onChange={(ev) =>
+                      recalc(i, "note", ev.target.value)
+                    }
                   />
                 </td>
-
-                <td className="h2">₹ {e.balanceSalary}</td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </tbody>
+          </table>
+
+          <div
+            style={{
+              marginTop: 15,
+              fontSize: 22,
+              fontWeight: 700,
+              color: "#2e7d32",
+              textAlign: "right",
+            }}
+          >
+            FINAL SALARY: ₹ {e.balanceSalary}
+          </div>
+        </div>
+      ))}
 
       <button className="btn btn-primary" style={{ marginTop: 20 }} onClick={save}>
         Save Payroll
