@@ -5,10 +5,22 @@ export default function GeneratePayroll() {
   const [month, setMonth] = useState("");
   const [workingDays, setWorkingDays] = useState("");
   const [employees, setEmployees] = useState([]);
+  const [search, setSearch] = useState("");
 
-  // ===============================
-  // CHECK INCREMENT APPLICABLE
-  // ===============================
+  const compactCell = {
+    padding: "4px 8px",
+    fontSize: "13px",
+    verticalAlign: "middle"
+  };
+
+  const labelCell = {
+    padding: "4px 8px",
+    fontSize: "13px",
+    fontWeight: 600,
+    width: "170px",
+    whiteSpace: "nowrap"
+  };
+
   const isIncrementApplicable = (payrollMonth, fromMonth) => {
     if (!payrollMonth || !fromMonth) return false;
     return payrollMonth >= fromMonth;
@@ -18,14 +30,11 @@ export default function GeneratePayroll() {
     if (!value) return "";
     const d = new Date(value + "-01");
     return d.toLocaleString("default", {
-      month: "long",
+      month: "short",
       year: "numeric",
     });
   };
 
-  // ===============================
-  // GET BASE RATE
-  // ===============================
   const getBaseRate = (emp) => {
     const applied = isIncrementApplicable(month, emp.salaryIncrementFrom);
     const increment = applied ? Number(emp.salaryIncrement || 0) : 0;
@@ -42,13 +51,10 @@ export default function GeneratePayroll() {
     const fm = formatMonthYear(emp.salaryIncrementFrom);
 
     return applied
-      ? `₹${emp.salaryIncrement} applied from ${fm}`
-      : `₹${emp.salaryIncrement} from ${fm}`;
+      ? `₹${emp.salaryIncrement} from ${fm}`
+      : `₹${emp.salaryIncrement} (from ${fm})`;
   };
 
-  // ===============================
-  // LOAD EMPLOYEES
-  // ===============================
   useEffect(() => {
     (async () => {
       const r = await api.get("/employees");
@@ -71,9 +77,6 @@ export default function GeneratePayroll() {
     })();
   }, []);
 
-  // ===============================
-  // LEAVE CALC
-  // ===============================
   const calculateLeaveDeduction = (
     salaryType,
     baseRate,
@@ -88,9 +91,6 @@ export default function GeneratePayroll() {
       : (baseRate / 30) * eff;
   };
 
-  // ===============================
-  // RECALC
-  // ===============================
   const recalc = (i, field, value) => {
     const arr = [...employees];
     const e = arr[i];
@@ -128,9 +128,6 @@ export default function GeneratePayroll() {
     setEmployees(arr);
   };
 
-  // ===============================
-  // SAVE
-  // ===============================
   const save = async () => {
     if (!month) return alert("Select month");
 
@@ -145,13 +142,16 @@ export default function GeneratePayroll() {
 
   return (
     <div>
+
       {/* HEADER */}
       <div className="page-header">
-        <h1 className="page-title">Generate Payroll</h1>
+        <h1 className="page-title" style={{ fontSize: "20px" }}>
+          Generate Payroll
+        </h1>
       </div>
 
       {/* MONTH */}
-      <div className="card">
+      <div className="card" style={{ padding: "10px" }}>
         <label>Month</label>
         <input
           type="month"
@@ -162,7 +162,7 @@ export default function GeneratePayroll() {
       </div>
 
       {/* COMMON DAYS */}
-      <div className="card" style={{ marginTop: 15 }}>
+      <div className="card" style={{ marginTop: 10, padding: "10px" }}>
         <label>Common Working Days (Monthly)</label>
         <input
           className="input"
@@ -171,40 +171,68 @@ export default function GeneratePayroll() {
           onChange={(e) => setWorkingDays(e.target.value)}
         />
       </div>
-
-      {/* EMPLOYEES */}
-      {employees.map((e, i) => (
-        <div key={i} className="card" style={{ marginTop: 25 }}>
-          <h2>
+{/* SEARCH BOX */}
+<div className="card" style={{ marginTop: 10, padding: "10px" }}>
+  <label>Search Employee</label>
+  <input
+    type="text"
+    className="input"
+    placeholder="Search by name or employee ID..."
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+  />
+</div>
+      {/* EMPLOYEE BOXES */}
+      {employees
+  .filter((e) => {
+    const term = search.toLowerCase();
+    return (
+      e.name?.toLowerCase().includes(term) ||
+      e.employeeId?.toLowerCase().includes(term)
+    );
+  })
+  .map((e, i) => (
+        <div
+          key={i}
+          className="card"
+          style={{
+            marginTop: 15,
+            padding: "10px",
+            maxWidth: "650px"
+          }}
+        >
+          <h3 style={{ marginBottom: 6, fontSize: "16px" }}>
             {e.name} <small>({e.location})</small>
-          </h2>
+          </h3>
 
-          <table className="table">
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse"
+            }}
+          >
             <tbody>
               <tr>
-                <td>Base Salary</td>
-                <td>
-                  ₹ {getBaseRate(e)} {e.salaryType === "daily" && "/ day"}
+                <td style={labelCell}>Base Salary</td>
+                <td style={compactCell}>
+                  ₹ {getBaseRate(e)}{" "}
+                  {e.salaryType === "daily" && "/ day"}
                 </td>
               </tr>
 
               <tr>
-                <td>Salary Increment</td>
-                <td>{getIncrementDisplay(e)}</td>
+                <td style={labelCell}>Salary Increment</td>
+                <td style={compactCell}>{getIncrementDisplay(e)}</td>
               </tr>
 
               <tr>
-                <td>OT Rate</td>
-                <td>₹ {e.otRate}</td>
-              </tr>
-
-              <tr>
-                <td>Working Days</td>
-                <td>
+                <td style={labelCell}>Working Days</td>
+                <td style={compactCell}>
                   {e.salaryType === "daily" ? (
                     <input
                       className="input"
                       value={e.workingDays}
+                      style={{ width: 80, fontSize: 12 }}
                       onChange={(ev) =>
                         recalc(i, "workingDays", ev.target.value)
                       }
@@ -220,16 +248,17 @@ export default function GeneratePayroll() {
                 ["Casual Leave", "casualLeave"],
                 ["TA + DA", "taDa"],
                 ["OT Hours", "overtime"],
-                ["Festival Allowance", "festivalAllowance"],
-                ["Other Allowance", "otherAllowance"],
-                ["Advance Salary", "advanceSalary"],
+                ["Festival", "festivalAllowance"],
+                ["Other", "otherAllowance"],
+                ["Advance", "advanceSalary"],
               ].map(([label, key]) => (
                 <tr key={key}>
-                  <td>{label}</td>
-                  <td>
+                  <td style={labelCell}>{label}</td>
+                  <td style={compactCell}>
                     <input
                       className="input"
                       value={e[key]}
+                      style={{ width: 100, fontSize: 12 }}
                       onChange={(ev) =>
                         recalc(i, key, ev.target.value)
                       }
@@ -239,16 +268,17 @@ export default function GeneratePayroll() {
               ))}
 
               <tr>
-                <td>OT Amount</td>
-                <td>₹ {e.otAmount}</td>
+                <td style={labelCell}>OT Amount</td>
+                <td style={compactCell}>₹ {e.otAmount}</td>
               </tr>
 
               <tr>
-                <td>Note</td>
-                <td>
+                <td style={labelCell}>Note</td>
+                <td style={compactCell}>
                   <input
                     className="input"
                     value={e.note}
+                    style={{ width: 150, fontSize: 12 }}
                     onChange={(ev) =>
                       recalc(i, "note", ev.target.value)
                     }
@@ -260,19 +290,23 @@ export default function GeneratePayroll() {
 
           <div
             style={{
-              marginTop: 15,
-              fontSize: 22,
+              marginTop: 10,
+              fontSize: 18,
               fontWeight: 700,
               color: "#2e7d32",
               textAlign: "right",
             }}
           >
-            FINAL SALARY: ₹ {e.balanceSalary}
+            ₹ {e.balanceSalary}
           </div>
         </div>
       ))}
 
-      <button className="btn btn-primary" style={{ marginTop: 20 }} onClick={save}>
+      <button
+        className="btn btn-primary"
+        style={{ marginTop: 20 }}
+        onClick={save}
+      >
         Save Payroll
       </button>
     </div>
