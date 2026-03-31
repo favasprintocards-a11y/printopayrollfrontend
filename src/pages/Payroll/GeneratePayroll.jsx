@@ -116,14 +116,15 @@ export default function GeneratePayroll() {
       e.casualLeave
     );
 
-    e.balanceSalary =
+    e.balanceSalary = Math.round(
       baseSalary -
       deduction +
       Number(e.taDa || 0) +
       Number(e.otAmount || 0) +
       Number(e.festivalAllowance || 0) +
       Number(e.otherAllowance || 0) -
-      Number(e.advanceSalary || 0);
+      Number(e.advanceSalary || 0)
+    );
 
     setEmployees(arr);
   };
