@@ -10,9 +10,11 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false); // 👁️ NEW
+  const [isLoading, setIsLoading] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     try {
       const res = await api.post("/auth/login", { email, password });
@@ -24,6 +26,8 @@ export default function Login() {
     } catch (err) {
       console.error("Login error:", err);
       alert("Invalid email or password");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -49,6 +53,7 @@ export default function Login() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            disabled={isLoading}
           />
 
           {/* PASSWORD */}
@@ -61,18 +66,19 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={isLoading}
               style={{ paddingRight: "42px" }}
             />
 
             {/* EYE ICON */}
             <span
-              onClick={() => setShowPassword(!showPassword)}
+              onClick={() => !isLoading && setShowPassword(!showPassword)}
               style={{
                 position: "absolute",
                 right: 12,
                 top: "50%",
                 transform: "translateY(-50%)",
-                cursor: "pointer",
+                cursor: isLoading ? "not-allowed" : "pointer",
                 fontSize: 16,
                 opacity: 0.7,
                 userSelect: "none"
@@ -83,8 +89,8 @@ export default function Login() {
             </span>
           </div>
 
-          <button type="submit" className="btn btn-primary login-btn">
-            Login
+          <button type="submit" className="btn btn-primary login-btn" disabled={isLoading}>
+            {isLoading ? "Logging in..." : "Login"}
           </button>
 
         </form>

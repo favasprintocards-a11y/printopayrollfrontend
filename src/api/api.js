@@ -10,8 +10,10 @@
 
 import axios from "axios";
 
+const isDevelopment = import.meta.env.MODE === 'development';
+
 const api = axios.create({
-  baseURL: "https://printopayrollbackend.onrender.com/api",
+  baseURL: isDevelopment ? "http://localhost:5000/api" : "https://printopayrollbackend.onrender.com/api",
   timeout: 30000,
 });
 
