@@ -184,16 +184,17 @@ export default function GeneratePayroll() {
 </div>
       {/* EMPLOYEE BOXES */}
       {employees
-  .filter((e) => {
-    const term = search.toLowerCase();
-    return (
-      e.name?.toLowerCase().includes(term) ||
-      e.employeeId?.toLowerCase().includes(term)
-    );
-  })
-  .map((e, i) => (
+        .map((e, index) => ({ e, originalIndex: index }))
+        .filter(({ e }) => {
+          const term = search.toLowerCase();
+          return (
+            e.name?.toLowerCase().includes(term) ||
+            e.employeeId?.toLowerCase().includes(term)
+          );
+        })
+        .map(({ e, originalIndex: i }) => (
         <div
-          key={i}
+          key={e._id || i}
           className="card"
           style={{
             marginTop: 15,
